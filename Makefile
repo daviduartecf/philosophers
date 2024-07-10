@@ -2,7 +2,7 @@ CC = cc -g
 NAME = philo
 FT_PRINTF = ft_printf/libftprintf.a
 FLAGS = -Wall -Werror -Wextra
-SRCS = philo_study.c
+SRCS = philo_study.c eat_sleep_think.c
 OBJS = ${SRCS:.c=.o}
 
 all: ${NAME}
