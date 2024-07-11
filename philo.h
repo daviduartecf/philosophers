@@ -16,41 +16,35 @@ typedef struct s_info t_info;
 
 typedef struct s_philo
 {
-	pthread_t	thread;
-	int	n_philo;
-	int	id;
-	uint64_t	last_meal;
-	int	n_times_to_eat;
-	pthread_mutex_t	*r_fork;
+	int				id;
+	int				n_philo;
+	int				n_times_to_eat;
+	t_info			*info;
+	long long		last_meal;
+	pthread_t		thread;
 	pthread_mutex_t	l_fork;
-	t_info	*info;
+	pthread_mutex_t	*r_fork;
 }	t_philo;
 
 struct s_info
 {
-	int	n_philo;
-	size_t	time_to_die;
-	size_t	time_to_eat;
-	size_t	time_to_sleep;
-	int	n_times_to_eat;
-	int	death;
-	uint64_t	start_time;
-	t_philo	philos[200];
+	int				n_philo;
+	int			time_to_die;
+	size_t			time_to_eat;
+	size_t			time_to_sleep;
+	int				n_times_to_eat;
+	int				someone_died;
+	long long		start_time;
+	t_philo			philos[200];
 	pthread_mutex_t	sync_mutex;
 	pthread_mutex_t	eat_mutex;
 };
 
-
-typedef struct s_mainstruct
-{
-	t_philo	*philos;
-}	t_mainstruct;
-
 int	parse_input(char *argv[], int argc, t_info *info);
 
-void	eat(int id);
-void	thinking(int id);
-void	sleeping(int id);
-void	picks_fork(int id);
-void	puts_down_fork(int id);
+void	eat(int id, long long time);
+void	thinking(int id, long long time);
+void	sleeping(int id, long long time);
+void	picks_fork(int id, long long time);
+void	puts_down_fork(int id, long long time);
 #endif

@@ -1,12 +1,25 @@
 #include "philo.h"
 
-uint64_t	ft_get_time(void)
+long long	ft_get_time(void)
 {
-	uint64_t	time;
 	struct	timeval	tv;
 	gettimeofday(&tv, NULL);
-	time = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-	return (time);
+	return ((long long)(tv.tv_sec) * 1000) + ((long long)(tv.tv_usec) / 1000);
+}
+
+void		my_sleep(long long time)
+{
+	long long i;
+
+	i = ft_get_time();
+	//while (!(info->someone_dead))
+	//{
+	while (1)
+	{
+		if ((ft_get_time() - i) >= time)
+			break ;
+		usleep(25);
+	}
 }
 
 void	destroy_forks(t_info *info)
@@ -20,16 +33,13 @@ void	destroy_forks(t_info *info)
 		i ++;
 	}
 	pthread_mutex_destroy(&info->sync_mutex);
+	pthread_mutex_destroy(&info->eat_mutex);
 }
 
-void	write_action(t_philo *philo, void (*action)(int id))
+void	write_action(t_philo *philo, void (*action)(int id, long long time))
 {
-	uint64_t	time_diff;
-
-	time_diff = ft_get_time() - philo->info->start_time;
 	pthread_mutex_lock(&philo->info->sync_mutex);
-	ft_printf("%d ", time_diff);
-	action(philo->id);
+	action(philo->id, ft_get_time() - philo->info->start_time);
 	pthread_mutex_unlock(&philo->info->sync_mutex);
 }
 
@@ -41,6 +51,12 @@ void pick_up_forks(t_philo *philos)
 		write_action(philos, picks_fork);
 		pthread_mutex_lock(&philos->l_fork);
 		write_action(philos, picks_fork);
+		pthread_mutex_lock(&philos->info->eat_mutex);
+		write_action(philos, eat);
+		philos->last_meal = ft_get_time();
+		pthread_mutex_unlock(&philos->info->eat_mutex);
+		//usleep(philos->info->time_to_eat * 1000);
+		my_sleep(philos->info->time_to_eat);
 	}
 	else
 	{
@@ -48,16 +64,19 @@ void pick_up_forks(t_philo *philos)
 		write_action(philos, picks_fork);
 		pthread_mutex_lock(philos->r_fork);
 		write_action(philos, picks_fork);
+		//pthread_mutex_lock(&philos->info->eat_mutex);
+		write_action(philos, eat);
+		philos->last_meal = ft_get_time();
+		pthread_mutex_unlock(&philos->info->eat_mutex);
+		//usleep(philos->info->time_to_eat * 1000);
+		my_sleep(philos->info->time_to_eat);
 	}
 }
 
 void	put_down_forks(t_philo *philos)
 {
 	pthread_mutex_unlock(&philos->l_fork);
-	//write_action(philos, puts_down_fork);
 	pthread_mutex_unlock(philos->r_fork);
-	//write_action(philos, puts_down_fork);
-	//pthread_mutex_unlock(&philos->info->sync_mutex);
 }
 
 void	*philosophers(void *arg)
@@ -66,24 +85,14 @@ void	*philosophers(void *arg)
 	int	id;
 
 	id = philo->id;
-	while (1)
+	while (!philo->info->someone_died)
 	{
 		pick_up_forks(philo);
-		/*pthread_mutex_lock(&*(philo)->r_fork);
-		write_action(philo, picks_fork);
-		pthread_mutex_lock(&philo->l_fork);
-		write_action(philo, picks_fork);
-		pthread_mutex_lock(&(philo->info->eat_mutex)); */
-		write_action(philo, eat);
-		usleep(philo->info->time_to_eat * 1000);
-		pthread_mutex_unlock(&(philo->info->eat_mutex));
+		//pthread_mutex_unlock(&(philo->info->eat_mutex));
 		put_down_forks(philo);
-		/* pthread_mutex_unlock(&*(philo)->r_fork);
-		write_action(philo, puts_down_fork);
-		pthread_mutex_unlock(&philo->l_fork);
-		write_action(philo, puts_down_fork); */
 		write_action(philo, sleeping);
-		usleep(philo->info->time_to_sleep * 1000);
+		//usleep(philo->info->time_to_sleep * 1000);
+		my_sleep(philo->info->time_to_sleep);
 		write_action(philo, thinking);
 	}
 	return (NULL);
@@ -94,8 +103,10 @@ void	get_philos(t_info *info)
 	int	i;
 
 	i = 0;
+	info->someone_died = 0;
 	while (i < info->n_philo)
 	{
+		info->philos[i].last_meal = ft_get_time();
 		info->philos[i].id = i;
 		pthread_mutex_init(&info->philos[i].l_fork, NULL);
 		if (i + 1 == info->n_philo)
@@ -103,6 +114,24 @@ void	get_philos(t_info *info)
 		else
 			info->philos[i].r_fork = &info->philos[i + 1].l_fork;
 		info->philos[i].info = info;
+		i ++;
+	}
+}
+
+void	check_for_death(t_info	*info, t_philo *philos)
+{
+	int	i;
+
+	i = 0;
+	while (i < info->n_philo && !(info->someone_died))
+	{
+		pthread_mutex_lock(&info->sync_mutex);
+		if (ft_get_time() - philos[i].last_meal > info->time_to_die)
+		{
+			info->someone_died = 1;
+		}
+		pthread_mutex_unlock(&info->sync_mutex);
+		usleep(100);
 		i ++;
 	}
 }
@@ -127,6 +156,7 @@ int	main(int argc, char *argv[])
 	while (++i < info.n_philo)
 		pthread_create(&info.philos[i].thread, NULL, philosophers, &info.philos[i]);
 	i = -1;
+	check_for_death(&info, info.philos);
 	while (++i < info.n_philo)
 		pthread_join(info.philos[i].thread, NULL);
 	destroy_forks(&info);
@@ -152,5 +182,6 @@ int	parse_input(char *argv[], int argc, t_info *info)
 		info->n_times_to_eat = 0;
 	info->start_time = ft_get_time();
 	pthread_mutex_init(&info->sync_mutex, NULL);
+	pthread_mutex_init(&info->eat_mutex, NULL);
 	return (1);
 }
