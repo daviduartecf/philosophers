@@ -19,39 +19,45 @@ void	destroy_forks(t_info *info)
 		pthread_mutex_destroy(&info->philos[i].l_fork);
 		i ++;
 	}
-}
-
-/* void pick_up_forks(t_philo *philos, pthread_mutex_t l_fork, pthread_mutex_t r_fork, int id)
-{
-	if (id == philos[1].n_philo - 1)
-	{
-		pthread_mutex_lock(&r_fork);
-		pthread_mutex_lock(&l_fork);
-	}
-	else
-	{
-		pthread_mutex_lock(&l_fork);
-		pthread_mutex_lock(&r_fork);
-	}
-	pthread_mutex_lock(&philos->info->sync_mutex);
-} */
-
-void	put_down_forks(t_philo *philos, pthread_mutex_t l_fork, pthread_mutex_t r_fork)
-{
-	pthread_mutex_unlock(&l_fork);
-	pthread_mutex_unlock(&r_fork);
-	pthread_mutex_unlock(&philos->info->sync_mutex);
+	pthread_mutex_destroy(&info->sync_mutex);
 }
 
 void	write_action(t_philo *philo, void (*action)(int id))
 {
-	uint64_t	times;
+	uint64_t	time_diff;
 
-	times = (int)time(NULL);
+	time_diff = ft_get_time() - philo->info->start_time;
 	pthread_mutex_lock(&philo->info->sync_mutex);
-	ft_printf("%d ", times);
+	ft_printf("%d ", time_diff);
 	action(philo->id);
 	pthread_mutex_unlock(&philo->info->sync_mutex);
+}
+
+void pick_up_forks(t_philo *philos)
+{
+	if (philos->id % 2 == 0)
+	{
+		pthread_mutex_lock(philos->r_fork);
+		write_action(philos, picks_fork);
+		pthread_mutex_lock(&philos->l_fork);
+		write_action(philos, picks_fork);
+	}
+	else
+	{
+		pthread_mutex_lock(&philos->l_fork);
+		write_action(philos, picks_fork);
+		pthread_mutex_lock(philos->r_fork);
+		write_action(philos, picks_fork);
+	}
+}
+
+void	put_down_forks(t_philo *philos)
+{
+	pthread_mutex_unlock(&philos->l_fork);
+	//write_action(philos, puts_down_fork);
+	pthread_mutex_unlock(philos->r_fork);
+	//write_action(philos, puts_down_fork);
+	//pthread_mutex_unlock(&philos->info->sync_mutex);
 }
 
 void	*philosophers(void *arg)
@@ -62,20 +68,25 @@ void	*philosophers(void *arg)
 	id = philo->id;
 	while (1)
 	{
+		pick_up_forks(philo);
+		/*pthread_mutex_lock(&*(philo)->r_fork);
+		write_action(philo, picks_fork);
 		pthread_mutex_lock(&philo->l_fork);
-		//write_action(philo, picks_fork);
-		pthread_mutex_lock(&*(philo)->r_fork);
-		//write_action(philo, picks_fork);
-		pthread_mutex_lock(&(philo->info->eat_mutex));
+		write_action(philo, picks_fork);
+		pthread_mutex_lock(&(philo->info->eat_mutex)); */
 		write_action(philo, eat);
-		pthread_mutex_unlock(&(philo->info->eat_mutex));
 		usleep(philo->info->time_to_eat * 1000);
+		pthread_mutex_unlock(&(philo->info->eat_mutex));
+		put_down_forks(philo);
+		/* pthread_mutex_unlock(&*(philo)->r_fork);
+		write_action(philo, puts_down_fork);
 		pthread_mutex_unlock(&philo->l_fork);
-		pthread_mutex_unlock(&*(philo)->r_fork);
+		write_action(philo, puts_down_fork); */
 		write_action(philo, sleeping);
 		usleep(philo->info->time_to_sleep * 1000);
 		write_action(philo, thinking);
 	}
+	return (NULL);
 }
 
 void	get_philos(t_info *info)
@@ -85,7 +96,7 @@ void	get_philos(t_info *info)
 	i = 0;
 	while (i < info->n_philo)
 	{
-		info->philos[i].id = i + 1;
+		info->philos[i].id = i;
 		pthread_mutex_init(&info->philos[i].l_fork, NULL);
 		if (i + 1 == info->n_philo)
 			info->philos[i].r_fork = &info->philos[0].l_fork;
@@ -115,12 +126,9 @@ int	main(int argc, char *argv[])
 	get_philos(&info);
 	while (++i < info.n_philo)
 		pthread_create(&info.philos[i].thread, NULL, philosophers, &info.philos[i]);
-	i = 0;
-	while (i < info.n_philo)
-	{
+	i = -1;
+	while (++i < info.n_philo)
 		pthread_join(info.philos[i].thread, NULL);
-		i ++;
-	}
 	destroy_forks(&info);
 }
 
@@ -132,7 +140,6 @@ int	parse_input(char *argv[], int argc, t_info *info)
 	//while (argv[++i])
 	//	if (!valid_args(argv[i]))
 	//		return (0);
-	info->start_time = ft_get_time();
 	info->n_philo = ft_atoi(argv[1]);
 	if (info->n_philo > 200)
 		return (0);
@@ -143,6 +150,7 @@ int	parse_input(char *argv[], int argc, t_info *info)
 		info->n_times_to_eat = ft_atoi(argv[5]);
 	else
 		info->n_times_to_eat = 0;
+	info->start_time = ft_get_time();
 	pthread_mutex_init(&info->sync_mutex, NULL);
 	return (1);
 }

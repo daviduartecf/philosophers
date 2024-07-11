@@ -35,7 +35,7 @@ struct s_info
 	int	n_times_to_eat;
 	int	death;
 	uint64_t	start_time;
-	struct s_philo	philos[200];
+	t_philo	philos[200];
 	pthread_mutex_t	sync_mutex;
 	pthread_mutex_t	eat_mutex;
 };
@@ -52,4 +52,5 @@ void	eat(int id);
 void	thinking(int id);
 void	sleeping(int id);
 void	picks_fork(int id);
+void	puts_down_fork(int id);
 #endif
