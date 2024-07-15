@@ -6,36 +6,33 @@
 /*   By: daduarte <daduarte@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/09 14:55:51 by daduarte          #+#    #+#             */
-/*   Updated: 2024/07/11 12:41:52 by daduarte         ###   ########.fr       */
+/*   Updated: 2024/07/11 16:42:33 by daduarte         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	sleeping(int id)
+void	sleeping(int id, long long time)
 {
-	ft_printf("-> Philosopher %d is sleeping.\n", id + 1);
-	//sleep(5);
+	printf("%llu %d is sleeping\n", time, id + 1);
 }
 
-void	eat(int id)
+void	eat(int id, long long time)
 {
-	ft_printf("-> Philosopher %d is eating.\n", id + 1);
-	//sleep(5);
+	printf("%llu %d is eating\n", time, id + 1);
 }
 
-void	thinking(int id)
+void	thinking(int id, long long time)
 {
-	ft_printf("-> Philosopher %d is thinking.\n", id + 1);
-	//sleep(5);
+	printf("%llu %d is thinking\n", time, id + 1);
 }
 
-void	picks_fork(int id)
+void	picks_fork(int id, long long time)
 {
-	ft_printf("-> Philosopher %d has taken a fork.\n", id + 1);
+	printf("%llu %d has taken a fork\n", time, id + 1);
 }
 
-void	puts_down_fork(int id)
+void	puts_down_fork(int id, long long time)
 {
-	ft_printf("-> Philosopher %d puts down a fork.\n", id + 1);
+	printf("%llu %d puts down a fork\n", time, id + 1);
 }
