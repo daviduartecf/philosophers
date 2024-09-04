@@ -6,7 +6,7 @@
 #    By: daduarte <daduarte@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/22 09:40:29 by daduarte          #+#    #+#              #
-#    Updated: 2024/04/22 09:40:30 by daduarte         ###   ########.fr        #
+#    Updated: 2024/09/03 11:40:59 by daduarte         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,7 +23,7 @@ BONUS_SRCS = ft_lstadd_front.c ft_lstlast.c ft_lstnew.c ft_lstsize.c ft_lstadd_b
 	ft_lstdelone.c ft_lstclear.c ft_lstiter.c ft_lstmap.c
 NAME = libft.a
 LIBC = ar rcs
-RM = rm -f
+RM = @rm -f
 
 OBJS = $(SRCS:.c=.o)
 
