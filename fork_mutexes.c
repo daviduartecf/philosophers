@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   fork_mutexes.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: daduarte <daduarte@student.42.fr>          +#+  +:+       +#+        */
+/*   By: daduarte <daduarte@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 11:34:10 by daduarte          #+#    #+#             */
-/*   Updated: 2024/09/03 15:40:36 by daduarte         ###   ########.fr       */
+/*   Updated: 2024/09/06 22:51:20 by daduarte         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-
+/*
 void	pick_up_forks(t_philo *philos)
 {
 	if (philos->id % 2 == 0 && !philos->info->someone_died && !philos->info->all_full)
@@ -43,6 +43,29 @@ void	pair_forks(t_philo *philos)
 	philos->eat_count += 1;
 	pthread_mutex_unlock(&philos->lock);
 }
+*/
+void	*free_info(t_info *info)
+{
+	int	i;
+
+	if (!info)
+		return (NULL);
+	if (info->forks_mutex != NULL)
+		free(info->forks_mutex);
+	if (info->philos != NULL)
+	{
+		i = 0;
+		while (i < info->n_philo)
+		{
+			if (info->philos[i] != NULL)
+				free(info->philos[i]);
+			i++;
+		}
+		free(info->philos);
+	}
+	free(info);
+	return (NULL);
+}
 
 void	destroy_forks(t_info *info)
 {
@@ -51,16 +74,15 @@ void	destroy_forks(t_info *info)
 	i = 0;
 	while (i < info->n_philo)
 	{
-		pthread_mutex_destroy(&info->philos[i].l_fork);
+		pthread_mutex_destroy(&info->forks_mutex[i]);
+		pthread_mutex_destroy(&info->philos[i]->eat_mutex);
 		i ++;
 	}
 	pthread_mutex_destroy(&info->write_mutex);
-	pthread_mutex_destroy(&info->sync_mutex);
-	pthread_mutex_destroy(&info->eat_mutex);
 	pthread_mutex_destroy(&info->dead_mutex);
-	free(info->philos);
+	//free(info->philos);
 }
-
+/*
 void	put_down_forks(t_philo *philos)
 {
 	if (philos->id % 2 == 0)
@@ -73,4 +95,4 @@ void	put_down_forks(t_philo *philos)
 		pthread_mutex_unlock(&philos->l_fork);
 		pthread_mutex_unlock(philos->r_fork);
 	}
-}
+}*/

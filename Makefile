@@ -2,7 +2,7 @@ CC = cc -g
 NAME = philo
 FT_PRINTF = ft_printf/libftprintf.a
 FLAGS = -Wall -Werror -Wextra
-SRCS = main.c eat_sleep_think.c utils.c parsing_philos.c fork_mutexes.c routines.c
+SRCS = main.c init.c eat_sleep_think.c utils.c parsing_philos.c fork_mutexes.c routines.c
 OBJS = ${SRCS:.c=.o}
 
 all: ${NAME}
