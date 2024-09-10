@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: daduarte <daduarte@student.42.fr>          +#+  +:+       +#+        */
+/*   By: daduarte <daduarte@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 10:57:37 by daduarte          #+#    #+#             */
-/*   Updated: 2024/09/03 15:08:41 by daduarte         ###   ########.fr       */
+/*   Updated: 2024/09/06 22:23:59 by daduarte         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,19 +34,19 @@ void		my_sleep(long long time, t_info *info)
 	}
 }
 
-void	write_action(t_philo *philo, void (*action)(int id, long long time))
+/*void	write_action(t_philo *philo, void (*action)(int id, long long time))
 {
 	pthread_mutex_lock(&philo->info->write_mutex);
 	if (!philo->info->someone_died && !philo->info->all_full)
 		action(philo->id, ft_get_time() - philo->info->start_time);
 	pthread_mutex_unlock(&philo->info->write_mutex);
-}
+}*/
 
-int	my_error(char *error_msg, t_info *info)
+/*int	my_error(char *error_msg, t_info *info)
 {
 	printf("%s", error_msg);
 	free(info->philos);
 	return (1);
-}
+}*/
 
 

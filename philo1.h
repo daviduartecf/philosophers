@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: daduarte <daduarte@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: daduarte <daduarte@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 12:31:17 by daduarte          #+#    #+#             */
-/*   Updated: 2024/09/06 22:34:20 by daduarte         ###   ########.fr       */
+/*   Updated: 2024/09/03 14:41:57 by daduarte         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 # define PHILO_H
 
 # include <stdio.h>
-# include <stdbool.h>
 # include <pthread.h>
 # include <unistd.h>
 # include <stdint.h>
@@ -32,11 +31,12 @@ typedef struct s_philo
 	int				id;
 	int				n_philo;
 	int				eat_count;
-	int				fork[2];
 	t_info			*info;
 	long long		last_meal;
 	pthread_t		thread;
-	pthread_mutex_t	eat_mutex;
+	pthread_mutex_t	lock;
+	pthread_mutex_t	l_fork;
+	pthread_mutex_t	*r_fork;
 }	t_philo;
 
 struct s_info
@@ -47,46 +47,28 @@ struct s_info
 	size_t			time_to_sleep;
 	int				n_times_to_eat;
 	int				someone_died;
+	int				all_full;
 	long long		start_time;
-	t_philo			**philos;
+	t_philo			*philos;
+	pthread_mutex_t	sync_mutex;
 	pthread_mutex_t	write_mutex;
-	pthread_mutex_t	*forks_mutex;
+	pthread_mutex_t	eat_mutex;
 	pthread_mutex_t	dead_mutex;
-	pthread_t		monitor;
+	pthread_t		full_thread;
+	pthread_t		death_thread;
 };
 
-/* NEW */
-void	eat_sleep_routine(t_philo *philo);
-void	think_routine(t_philo *philo, int silent);
-void	sim_start_delay(time_t start_time);
-void	philo_sleep(t_info *info, time_t sleep_time);
-void	write_status(t_philo *philo, bool reaper_report, char *status);
-void	print_status(t_philo *philo, char *str);
-int	kill_philo(t_philo *philo);
-int	has_simulation_stopped(t_info *info);
-void	set_sim_stop_flag(t_info *info, int state);
-int	check_for_death_or_fullness(t_info *info);
-void	*free_info(t_info *info);
-t_info	*parse_input(char *argv[], int argc, t_info *info);
-int	lone_philo_routine(t_philo *philo);
-
-/* INIT */
-int	init_global_mutexes(t_info *info);
-t_philo	**get_philos(t_info *info);
-void	give_forks(t_philo *philo);
-pthread_mutex_t	*init_forks(t_info *info);
-
 /* PARSING UTILS */
-//void		parse_input(char *argv[], int argc, t_info *info);
+void		parse_input(char *argv[], int argc, t_info *info);
 int			valid_args(char *str);
-t_philo		**get_philos(t_info *info);
+void		get_philos(t_info *info);
 
 /* COMMON UTILS */
 long long	ft_get_time(void);
 void		my_sleep(long long time, t_info *info);
-//void		write_action(t_philo *philo,
-//				void (*action)(int id, long long time));
-void	*my_error(char *str, t_info *info);
+void		write_action(t_philo *philo,
+				void (*action)(int id, long long time));
+int			my_error(char *error_msg, t_info *info);
 
 /* ROUTINES */
 void		pick_up_forks(t_philo *philos);
