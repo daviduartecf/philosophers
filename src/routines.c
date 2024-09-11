@@ -6,7 +6,7 @@
 /*   By: daduarte <daduarte@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 11:38:08 by daduarte          #+#    #+#             */
-/*   Updated: 2024/09/10 13:32:56 by daduarte         ###   ########.fr       */
+/*   Updated: 2024/09/11 11:36:18 by daduarte         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,10 +43,10 @@ int	kill_philo(t_philo *philo)
 void	eat_sleep_routine(t_philo *philo)
 {
 	pthread_mutex_lock(&philo->info->forks_mutex[philo->fork[0]]);
-	write_status(philo, false, "has taken a fork");
+	write_status(philo, 0, "has taken a fork");
 	pthread_mutex_lock(&philo->info->forks_mutex[philo->fork[1]]);
-	write_status(philo, false, "has taken a fork");
-	write_status(philo, false, "is eating");
+	write_status(philo, 0, "has taken a fork");
+	write_status(philo, 0, "is eating");
 	pthread_mutex_lock(&philo->eat_mutex);
 	philo->is_eating = 1;
 	philo->last_meal = ft_get_time();
@@ -81,10 +81,13 @@ void	*philosophers(void *data)
 	start_delay(philo->info->start_time);
 	if (philo->info->time_to_die == 0)
 		return (NULL);
+	if (philo->id % 2 != 0)
+		usleep(1000);
 	while (end_program(philo->info) == 0)
 	{
 		eat_sleep_routine(philo);
 		write_status(philo, 0, "is thinking");
+		usleep(1000);
 	}
 	return (NULL);
 }
